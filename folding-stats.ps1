@@ -8,100 +8,112 @@ public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow);
 $consolePtr = [Console.Window]::GetConsoleWindow()
 [Console.Window]::ShowWindow($consolePtr, 0)
 
-# Load the WPF framework
+# Load the required frameworks
 Add-Type -AssemblyName PresentationFramework
+Add-Type -AssemblyName System.Drawing
 
-# Define the overlay GUI using XAML inside standard quotes
+# Define the overlay GUI using XAML
 [xml]$xaml = '
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Folding@Home Stats Overlay" Height="220" Width="650"
+        Title="Folding@Home Stats Overlay" Height="260" Width="650"
         Background="#E6121212" WindowStartupLocation="CenterScreen"
         WindowStyle="None" AllowsTransparency="True" Topmost="True"
         FontFamily="Segoe UI Variable, Segoe UI" ResizeMode="NoResize">
     <Border BorderBrush="#44FFFFFF" BorderThickness="1" CornerRadius="8" Padding="15">
         <Grid>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,-5,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
                 
-                <CheckBox Name="TopmostToggle" Content="Pin to top" Foreground="#CCCCCC" 
-                          VerticalAlignment="Center" Margin="0,0,15,0" IsChecked="True" Cursor="Hand">
-                    <CheckBox.Template>
-                        <ControlTemplate TargetType="CheckBox">
-                            <StackPanel Orientation="Horizontal" Background="Transparent">
-                                <TextBlock Text="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}" 
-                                           VerticalAlignment="Center" Margin="0,0,8,0" FontSize="14"/>
-                                <Border x:Name="SwitchBorder" Width="36" Height="20" CornerRadius="10" 
-                                        Background="#333333" BorderThickness="1" BorderBrush="#555555" VerticalAlignment="Center">
-                                    <Ellipse x:Name="Knob" Width="12" Height="12" Fill="#888888" 
-                                             Margin="3,0,0,0" HorizontalAlignment="Left" />
-                                </Border>
-                            </StackPanel>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter TargetName="SwitchBorder" Property="Background" Value="#0067C0" />
-                                    <Setter TargetName="SwitchBorder" Property="BorderBrush" Value="#0067C0" />
-                                    <Setter TargetName="Knob" Property="Fill" Value="#FFFFFF" />
-                                    <Setter TargetName="Knob" Property="HorizontalAlignment" Value="Right" />
-                                    <Setter TargetName="Knob" Property="Margin" Value="0,0,3,0" />
-                                </Trigger>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="SwitchBorder" Property="BorderBrush" Value="#AAAAAA" />
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </CheckBox.Template>
-                </CheckBox>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Image Name="HeaderIcon" Width="24" Height="24" Margin="0,0,10,0" />
+                    <TextBlock Text="Folding@Home User Statistics" Foreground="#FFFFFF" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
+                </StackPanel>
 
-                <Button Name="MinimizeButton" Content="&#x2212;" Width="24" Height="24" 
-                        Background="Transparent" Foreground="#666666" BorderThickness="0" 
-                        FontSize="16" Cursor="Hand" Margin="0,0,5,0" FontWeight="Bold" />
-                <Button Name="CloseButton" Content="&#x2715;" Width="24" Height="24" 
-                        Background="Transparent" Foreground="#666666" BorderThickness="0" 
-                        FontSize="14" Cursor="Hand" />
-            </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <CheckBox Name="TopmostToggle" Content="Pin to top" Foreground="#CCCCCC" 
+                              VerticalAlignment="Center" Margin="0,0,15,0" IsChecked="True" Cursor="Hand">
+                        <CheckBox.Template>
+                            <ControlTemplate TargetType="CheckBox">
+                                <StackPanel Orientation="Horizontal" Background="Transparent">
+                                    <TextBlock Text="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}" 
+                                               VerticalAlignment="Center" Margin="0,0,8,0" FontSize="14"/>
+                                    <Border x:Name="SwitchBorder" Width="36" Height="20" CornerRadius="10" 
+                                            Background="#333333" BorderThickness="1" BorderBrush="#555555" VerticalAlignment="Center">
+                                        <Ellipse x:Name="Knob" Width="12" Height="12" Fill="#888888" 
+                                                 Margin="3,0,0,0" HorizontalAlignment="Left" />
+                                    </Border>
+                                </StackPanel>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter TargetName="SwitchBorder" Property="Background" Value="#0067C0" />
+                                        <Setter TargetName="SwitchBorder" Property="BorderBrush" Value="#0067C0" />
+                                        <Setter TargetName="Knob" Property="Fill" Value="#FFFFFF" />
+                                        <Setter TargetName="Knob" Property="HorizontalAlignment" Value="Right" />
+                                        <Setter TargetName="Knob" Property="Margin" Value="0,0,3,0" />
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="SwitchBorder" Property="BorderBrush" Value="#AAAAAA" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </CheckBox.Template>
+                    </CheckBox>
 
-            <Grid Margin="0,15,0,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+                    <Button Name="MinimizeButton" Content="&#x2212;" Width="24" Height="24" 
+                            Background="Transparent" Foreground="#666666" BorderThickness="0" 
+                            FontSize="16" Cursor="Hand" Margin="0,0,5,0" FontWeight="Bold" />
+                    <Button Name="CloseButton" Content="&#x2715;" Width="24" Height="24" 
+                            Background="Transparent" Foreground="#666666" BorderThickness="0" 
+                            FontSize="14" Cursor="Hand" />
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
                 
-                <Grid Grid.Row="0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    
-                    <StackPanel Grid.Column="0" Orientation="Horizontal">
-                        <TextBox Name="UsernameInput" Width="140" Height="24" Background="#1A1A1A" Foreground="#FFFFFF" 
-                                 BorderBrush="#555555" BorderThickness="1" Padding="4,0,4,0" 
-                                 VerticalContentAlignment="Center" />
-                        <Button Name="SetUserButton" Content="Set" Width="40" Height="24" Margin="5,0,0,0" 
-                                Background="#333333" Foreground="#FFFFFF" BorderThickness="0" Cursor="Hand" />
-                    </StackPanel>
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBox Name="UsernameInput" Width="140" Height="24" Background="#1A1A1A" Foreground="#FFFFFF" 
+                             BorderBrush="#555555" BorderThickness="1" Padding="4,0,4,0" 
+                             VerticalContentAlignment="Center" />
+                    <Button Name="SetUserButton" Content="Set" Width="40" Height="24" Margin="5,0,0,0" 
+                            Background="#333333" Foreground="#FFFFFF" BorderThickness="0" Cursor="Hand" />
+                </StackPanel>
 
-                    <TextBlock Name="SessionChangeLabel" Grid.Column="1" Foreground="#CCCCCC" FontSize="16" 
-                               Text="Waiting for initial data..." HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,25,0" />
-                </Grid>
-                           
-                <TextBlock Name="ScoreLabel" Grid.Row="1" Foreground="#FFFFFF" FontSize="64" 
-                           Text="Loading Points..." HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Light" />
-                           
-                <TextBlock Name="PercentLabel" Grid.Row="2" Foreground="#E0E0E0" FontSize="26" 
-                           Text="Top 0.000000% of users" HorizontalAlignment="Center" Margin="0,0,0,15" />
-                           
-                <Grid Grid.Row="3">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Name="UserRankLabel" Grid.Column="0" Foreground="#CCCCCC" FontSize="16" 
-                               Text="Loading user..." HorizontalAlignment="Left" />
-                    <TextBlock Name="NextUpdateLabel" Grid.Column="1" Foreground="#CCCCCC" FontSize="16" 
-                               Text="Next update in ..." HorizontalAlignment="Right" />
-                </Grid>
+                <TextBlock Name="SessionChangeLabel" Grid.Column="1" Foreground="#CCCCCC" FontSize="16" 
+                           Text="Waiting for initial data..." HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" />
+            </Grid>
+                       
+            <TextBlock Name="ScoreLabel" Grid.Row="3" Foreground="#FFFFFF" FontSize="64" 
+                       Text="Loading Points..." HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Light" />
+                       
+            <TextBlock Name="PercentLabel" Grid.Row="4" Foreground="#E0E0E0" FontSize="26" 
+                       Text="Top 0.000000% of users" HorizontalAlignment="Center" Margin="0,0,0,15" />
+                       
+            <Grid Grid.Row="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Name="UserRankLabel" Grid.Column="0" Foreground="#CCCCCC" FontSize="16" 
+                           Text="Loading user..." HorizontalAlignment="Left" />
+                <TextBlock Name="NextUpdateLabel" Grid.Column="1" Foreground="#CCCCCC" FontSize="16" 
+                           Text="Next update in ..." HorizontalAlignment="Right" />
             </Grid>
         </Grid>
     </Border>
@@ -118,6 +130,7 @@ $window.Add_MouseLeftButtonDown({
 })
 
 # Connect our PowerShell variables to the XAML elements
+$HeaderIcon = $window.FindName("HeaderIcon")
 $TopmostToggle = $window.FindName("TopmostToggle")
 $MinimizeButton = $window.FindName("MinimizeButton")
 $CloseButton = $window.FindName("CloseButton")
@@ -128,6 +141,24 @@ $ScoreLabel = $window.FindName("ScoreLabel")
 $PercentLabel = $window.FindName("PercentLabel")
 $UserRankLabel = $window.FindName("UserRankLabel")
 $NextUpdateLabel = $window.FindName("NextUpdateLabel")
+
+# Extract the icon from the currently running executable
+try {
+    $exePath = [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
+    $icon = [System.Drawing.Icon]::ExtractAssociatedIcon($exePath)
+    $bitmap = $icon.ToBitmap()
+    $memoryStream = New-Object System.IO.MemoryStream
+    $bitmap.Save($memoryStream, [System.Drawing.Imaging.ImageFormat]::Png)
+    $memoryStream.Position = 0
+    $bitmapImage = New-Object System.Windows.Media.Imaging.BitmapImage
+    $bitmapImage.BeginInit()
+    $bitmapImage.StreamSource = $memoryStream
+    $bitmapImage.CacheOption = [System.Windows.Media.Imaging.BitmapCacheOption]::OnLoad
+    $bitmapImage.EndInit()
+    $HeaderIcon.Source = $bitmapImage
+} catch {
+    # If icon extraction fails, it fails silently and leaves the image block empty
+}
 
 # Wire up the Window Control buttons
 $CloseButton.Add_Click({ $window.Close() })
@@ -192,7 +223,7 @@ $UpdateStats = {
         # Handle Session Changes math
         if ($null -eq $script:initialScore -or $script:initialScore -eq 0) {
             $script:initialScore = $currentScore
-            $SessionChangeLabel.Text = "No points gained this session"
+            $SessionChangeLabel.Text = "No score changes this session"
         } elseif ($currentScore -gt $script:initialScore) {
             $diff = $currentScore - $script:initialScore
             $SessionChangeLabel.Text = "Gained $('{0:N0}' -f $diff) points this session"
