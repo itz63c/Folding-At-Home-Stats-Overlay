@@ -22,6 +22,36 @@ Add-Type -AssemblyName PresentationFramework
     <Border BorderBrush="#44FFFFFF" BorderThickness="1" CornerRadius="8" Padding="15">
         <Grid>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,-5,0">
+                
+                <CheckBox Name="TopmostToggle" Content="Pin to top" Foreground="#CCCCCC" 
+                          VerticalAlignment="Center" Margin="0,0,15,0" IsChecked="True" Cursor="Hand">
+                    <CheckBox.Template>
+                        <ControlTemplate TargetType="CheckBox">
+                            <StackPanel Orientation="Horizontal" Background="Transparent">
+                                <TextBlock Text="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}" 
+                                           VerticalAlignment="Center" Margin="0,0,8,0" FontSize="14"/>
+                                <Border x:Name="SwitchBorder" Width="36" Height="20" CornerRadius="10" 
+                                        Background="#333333" BorderThickness="1" BorderBrush="#555555" VerticalAlignment="Center">
+                                    <Ellipse x:Name="Knob" Width="12" Height="12" Fill="#888888" 
+                                             Margin="3,0,0,0" HorizontalAlignment="Left" />
+                                </Border>
+                            </StackPanel>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="SwitchBorder" Property="Background" Value="#0067C0" />
+                                    <Setter TargetName="SwitchBorder" Property="BorderBrush" Value="#0067C0" />
+                                    <Setter TargetName="Knob" Property="Fill" Value="#FFFFFF" />
+                                    <Setter TargetName="Knob" Property="HorizontalAlignment" Value="Right" />
+                                    <Setter TargetName="Knob" Property="Margin" Value="0,0,3,0" />
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="SwitchBorder" Property="BorderBrush" Value="#AAAAAA" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </CheckBox.Template>
+                </CheckBox>
+
                 <Button Name="MinimizeButton" Content="&#x2212;" Width="24" Height="24" 
                         Background="Transparent" Foreground="#666666" BorderThickness="0" 
                         FontSize="16" Cursor="Hand" Margin="0,0,5,0" FontWeight="Bold" />
@@ -88,6 +118,7 @@ $window.Add_MouseLeftButtonDown({
 })
 
 # Connect our PowerShell variables to the XAML elements
+$TopmostToggle = $window.FindName("TopmostToggle")
 $MinimizeButton = $window.FindName("MinimizeButton")
 $CloseButton = $window.FindName("CloseButton")
 $UsernameInput = $window.FindName("UsernameInput")
@@ -106,6 +137,10 @@ $CloseButton.Add_MouseLeave({ $CloseButton.Foreground = "#666666" })
 $MinimizeButton.Add_Click({ $window.WindowState = "Minimized" })
 $MinimizeButton.Add_MouseEnter({ $MinimizeButton.Foreground = "#FFFFFF" })
 $MinimizeButton.Add_MouseLeave({ $MinimizeButton.Foreground = "#666666" })
+
+# Wire up the Topmost Toggle Checkbox
+$TopmostToggle.Add_Checked({ $window.Topmost = $true })
+$TopmostToggle.Add_Unchecked({ $window.Topmost = $false })
 
 # Wire up the Set User button hover effects
 $SetUserButton.Add_MouseEnter({ $SetUserButton.Background = "#444444" })
@@ -157,7 +192,7 @@ $UpdateStats = {
         # Handle Session Changes math
         if ($null -eq $script:initialScore -or $script:initialScore -eq 0) {
             $script:initialScore = $currentScore
-            $SessionChangeLabel.Text = "No score changes this session"
+            $SessionChangeLabel.Text = "No points gained this session"
         } elseif ($currentScore -gt $script:initialScore) {
             $diff = $currentScore - $script:initialScore
             $SessionChangeLabel.Text = "Gained $('{0:N0}' -f $diff) points this session"
